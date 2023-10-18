@@ -2,9 +2,10 @@
 @model IndexModel
 @{
     ViewData["Title"] = "Home page";
+    var brand = ViewData["Brand"];
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome to My Plant Diary</h1>
+    <h1 class="display-4">Welcome to @brand</h1>
     <p>Catalog your plants, where they are, when they have been watered and fertilized.</p>
 </div>
