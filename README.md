@@ -9,3 +9,7 @@ My Plant Diary will help you
 - See a history of plant maintenance
 
 ## Requirements
+
+## APIs I will use:
+[PlantPlaces Plant Details](https://plantplaces.com/perl/mobile/viewplantsjsonarray.pl)
+[Plant Places Specimen Locations](https://www.plantplaces.com/perl/mobile/viewspecimenlocations.pl)
