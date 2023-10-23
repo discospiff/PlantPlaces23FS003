@@ -1,6 +1,9 @@
 # PlantPlaces23FS003
 Catalog of plants and their schedule
 
+## Logo
+![The Plant Places logo is green with a beige background, and says, PlantPlaces.com](https://github.com/discospiff/PlantPlaces23FS003/blob/master/PlantPlacesLogo.gif)
+
 ## Introduction
 
 My Plant Diary will help you
