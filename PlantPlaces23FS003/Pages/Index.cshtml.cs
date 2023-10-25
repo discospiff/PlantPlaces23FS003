@@ -26,37 +26,46 @@ namespace PlantPlaces23FS003.Pages
                 brand = inBrand;
             }
             ViewData["Brand"] = brand;
+            Task<List<Specimen>> task = GetSpecimenData();
+            List<Specimen> specimens = task.Result;
+            ViewData["Specimens"] = specimens;
+        }
 
-            Task<HttpResponseMessage> task = httpClient.GetAsync("https://plantplaces.com/perl/mobile/specimenlocations.pl?Lat=39.1455&Lng=-84.509&Range=0.5&Source=location");
-            HttpResponseMessage response = task.Result;
-            List<Specimen> specimens = new List<Specimen>();
-            if (response.IsSuccessStatusCode)
+        private async Task<List<Specimen>> GetSpecimenData () {
+            return await Task.Run(async () =>
             {
-                Task<string> readString = response.Content.ReadAsStringAsync();
-                string specimenJson = readString.Result;
-                specimens = Specimen.FromJson(specimenJson);
-            }
-            
-            Task<HttpResponseMessage> plantTask = httpClient.GetAsync("https://plantplaces.com/perl/mobile/viewplantsjsonarray.pl?WetTolerant=on");
-            HttpResponseMessage plantResponse = plantTask.Result;
-            Task<string> plantStringTask = plantResponse.Content.ReadAsStringAsync();
-            string plantsJson = plantStringTask.Result;
-            List<Plant> plants = Plant.FromJson(plantsJson);
+                Task<HttpResponseMessage> plantTask = httpClient.GetAsync("https://plantplaces.com/perl/mobile/viewplantsjsonarray.pl?WetTolerant=on");
 
-            IDictionary<long, Plant> waterLovingPlants = new Dictionary<long, Plant>();
-            foreach(Plant plant in plants)
-            {
-                waterLovingPlants[plant.Id] = plant;
-            }
-            List<Specimen> waterLovingSpecimens = new List<Specimen>();
-            foreach(Specimen specimen in specimens)
-            {
-                if (waterLovingPlants.ContainsKey(specimen.PlantId))
+                Task<HttpResponseMessage> task = httpClient.GetAsync("https://plantplaces.com/perl/mobile/specimenlocations.pl?Lat=39.1455&Lng=-84.509&Range=0.5&Source=location");
+                HttpResponseMessage response = task.Result;
+                List<Specimen> specimens = new List<Specimen>();
+                if (response.IsSuccessStatusCode)
                 {
-                    waterLovingSpecimens.Add(specimen);
+                    Task<string> readString = response.Content.ReadAsStringAsync();
+                    string specimenJson = readString.Result;
+                    specimens = Specimen.FromJson(specimenJson);
                 }
-            }
-            ViewData["Specimens"] = waterLovingSpecimens;
+
+                HttpResponseMessage plantResponse = await plantTask;
+                Task<string> plantStringTask = plantResponse.Content.ReadAsStringAsync();
+                string plantsJson = plantStringTask.Result;
+                List<Plant> plants = Plant.FromJson(plantsJson);
+
+                IDictionary<long, Plant> waterLovingPlants = new Dictionary<long, Plant>();
+                foreach (Plant plant in plants)
+                {
+                    waterLovingPlants[plant.Id] = plant;
+                }
+                List<Specimen> waterLovingSpecimens = new List<Specimen>();
+                foreach (Specimen specimen in specimens)
+                {
+                    if (waterLovingPlants.ContainsKey(specimen.PlantId))
+                    {
+                        waterLovingSpecimens.Add(specimen);
+                    }
+                }
+                return waterLovingSpecimens;
+            });
         }
     }
 }
