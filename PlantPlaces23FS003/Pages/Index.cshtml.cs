@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using PlantPlacesPlants;
 using PlantPlacesSpecimens;
 
 namespace PlantPlaces23FS003.Pages
@@ -35,7 +36,27 @@ namespace PlantPlaces23FS003.Pages
                 string specimenJson = readString.Result;
                 specimens = Specimen.FromJson(specimenJson);
             }
-            ViewData["Specimens"] = specimens;
+            
+            Task<HttpResponseMessage> plantTask = httpClient.GetAsync("https://plantplaces.com/perl/mobile/viewplantsjsonarray.pl?WetTolerant=on");
+            HttpResponseMessage plantResponse = plantTask.Result;
+            Task<string> plantStringTask = plantResponse.Content.ReadAsStringAsync();
+            string plantsJson = plantStringTask.Result;
+            List<Plant> plants = Plant.FromJson(plantsJson);
+
+            IDictionary<long, Plant> waterLovingPlants = new Dictionary<long, Plant>();
+            foreach(Plant plant in plants)
+            {
+                waterLovingPlants[plant.Id] = plant;
+            }
+            List<Specimen> waterLovingSpecimens = new List<Specimen>();
+            foreach(Specimen specimen in specimens)
+            {
+                if (waterLovingPlants.ContainsKey(specimen.PlantId))
+                {
+                    waterLovingSpecimens.Add(specimen);
+                }
+            }
+            ViewData["Specimens"] = waterLovingSpecimens;
         }
     }
 }
