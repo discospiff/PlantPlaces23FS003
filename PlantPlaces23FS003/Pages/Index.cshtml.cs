@@ -37,6 +37,16 @@ namespace PlantPlaces23FS003.Pages
                 Task<HttpResponseMessage> plantTask = httpClient.GetAsync("https://plantplaces.com/perl/mobile/viewplantsjsonarray.pl?WetTolerant=on");
 
                 Task<HttpResponseMessage> task = httpClient.GetAsync("https://plantplaces.com/perl/mobile/specimenlocations.pl?Lat=39.1455&Lng=-84.509&Range=0.5&Source=location");
+
+                // grab the API key from THE SECRET STORE
+                var config = new ConfigurationBuilder()
+                .AddUserSecrets<Program>()
+                .Build();
+                string weatherApiKey = config["weatherapikey"];
+                string weatherEndpoint = "https://api.weatherbit.io/v2.0/current?&city=Cincinnati&country=USA&key=" + weatherApiKey;
+                Task<HttpResponseMessage> weatherTask = httpClient.GetAsync(weatherEndpoint);
+
+
                 HttpResponseMessage response = task.Result;
                 List<Specimen> specimens = new List<Specimen>();
                 if (response.IsSuccessStatusCode)
@@ -64,6 +74,36 @@ namespace PlantPlaces23FS003.Pages
                         waterLovingSpecimens.Add(specimen);
                     }
                 }
+
+                // get weather data from the async call to weather service.
+                HttpResponseMessage weatherResponse = await weatherTask;
+                Task<string> weatherReadTask = weatherResponse.Content.ReadAsStringAsync();
+                string weatherJson = weatherReadTask.Result;
+
+                // parse JSON weather to objects, using QuickType.
+                WeatherFeed.Weather weather = WeatherFeed.Weather.FromJson(weatherJson);
+                
+                // get our weather data, from which we can get individual data items.
+                List<WeatherFeed.Datum> weatherData = weather.Data;
+
+                // assume precip is 0, until we know what it is.
+                long precip = 0;
+
+                // iterate over the data items, until we find the weather attribute we're looking for.
+                foreach (WeatherFeed.Datum datum in weatherData)
+                {
+                    // if we know acutal precip, assign it here.
+                    precip = datum.Precip;
+                }
+
+                if (precip < 1)
+                {
+                    ViewData["Message"] = "It's dry!  Water these plants.";
+                } else
+                {
+                    ViewData["Message"] = "Rain expected.  No need to water.";
+                }
+
                 return waterLovingSpecimens;
             });
         }
