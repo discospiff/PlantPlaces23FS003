@@ -31,12 +31,16 @@ namespace PlantPlaces23FS003.Pages
             ViewData["Specimens"] = specimens;
         }
 
+        /// <summary>
+        /// Access APIs that have the data we are combining.
+        /// </summary>
+        /// <returns>A list of specimens that are thirsty.</returns>
         private async Task<List<Specimen>> GetSpecimenData () {
             return await Task.Run(async () =>
             {
                 Task<HttpResponseMessage> plantTask = httpClient.GetAsync("https://plantplaces.com/perl/mobile/viewplantsjsonarray.pl?WetTolerant=on");
 
-                Task<HttpResponseMessage> task = httpClient.GetAsync("https://plantplaces.com/perl/mobile/specimenlocations.pl?Lat=39.1455&Lng=-84.509&Range=0.5&Source=location");
+                Task<HttpResponseMessage> specimenTask = httpClient.GetAsync("https://plantplaces.com/perl/mobile/specimenlocations.pl?Lat=39.1455&Lng=-84.509&Range=0.5&Source=location");
 
                 // grab the API key from THE SECRET STORE
                 var config = new ConfigurationBuilder()
@@ -47,7 +51,7 @@ namespace PlantPlaces23FS003.Pages
                 Task<HttpResponseMessage> weatherTask = httpClient.GetAsync(weatherEndpoint);
 
 
-                HttpResponseMessage response = task.Result;
+                HttpResponseMessage response = specimenTask.Result;
                 List<Specimen> specimens = new List<Specimen>();
                 if (response.IsSuccessStatusCode)
                 {
@@ -98,10 +102,10 @@ namespace PlantPlaces23FS003.Pages
 
                 if (precip < 1)
                 {
-                    ViewData["Message"] = "It's dry!  Water these plants.";
+                    ViewData["WeatherMessage"] = "It's dry!  Water these plants.";
                 } else
                 {
-                    ViewData["Message"] = "Rain expected.  No need to water.";
+                    ViewData["WeatherMessage"] = "Rain expected.  No need to water.";
                 }
 
                 return waterLovingSpecimens;
