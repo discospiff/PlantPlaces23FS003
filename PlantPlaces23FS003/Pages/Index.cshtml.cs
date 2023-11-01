@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Schema;
 using PlantPlacesPlants;
 using PlantPlacesSpecimens;
 
@@ -53,11 +55,32 @@ namespace PlantPlaces23FS003.Pages
 
                 HttpResponseMessage response = specimenTask.Result;
                 List<Specimen> specimens = new List<Specimen>();
+
                 if (response.IsSuccessStatusCode)
                 {
                     Task<string> readString = response.Content.ReadAsStringAsync();
                     string specimenJson = readString.Result;
-                    specimens = Specimen.FromJson(specimenJson);
+
+                    // read in the schema file
+                    JSchema schema = JSchema.Parse(System.IO.File.ReadAllText("specimenschema.json"));
+                    // perform a very simple JSON parse into an array.
+                    JArray specimenArray = JArray.Parse(specimenJson);
+                    // create a collection of Strings that will hold any validation errors.
+                    IList<string> validationEvents = new List<string>();
+
+                    if(specimenArray.IsValid(schema, out validationEvents))
+                    {
+                        specimens = Specimen.FromJson(specimenJson);
+                    } 
+                    else
+                    {
+                        foreach (string evt in validationEvents)
+                        {
+                            Console.WriteLine(evt);
+                        }
+
+                    }
+                 
                 }
 
                 HttpResponseMessage plantResponse = await plantTask;

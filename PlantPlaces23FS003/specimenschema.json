@@ -1,0 +1,56 @@
+{
+  "$schema": "http://json-schema.org/draft-06/schema#",
+  "type": "array",
+  "items": {
+    "$ref": "#/definitions/Specimen"
+  },
+  "definitions": {
+    "Specimen": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "lat": {
+          "type": "number",
+          "minimum": -100,
+          "maximum": 100
+        },
+        "lng": {
+          "type": "number",
+          "minimum": -150,
+          "maximum": 150
+        },
+        "plant_id": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "specimen_id": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "common": {
+          "type": "string"
+        },
+        "genus": {
+          "type": "string",
+          "minLength": 2,
+          "maxLength": 60
+        },
+        "species": {
+          "type": "string"
+        },
+        "address": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "genus",
+        "plant_id",
+        "specimen_id"
+      ],
+      "title": "Specimen"
+    }
+  }
+}
