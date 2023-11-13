@@ -1,0 +1,18 @@
+body {
+	background-color:white;
+	color:black
+
+}
+
+#header {
+	display:none;
+}
+
+.content {
+	position:relative;
+	margin-top:1em;
+	}
+
+.noprint {
+	display:none;
+}
