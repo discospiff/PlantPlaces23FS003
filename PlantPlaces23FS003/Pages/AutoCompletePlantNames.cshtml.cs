@@ -9,11 +9,11 @@ namespace PlantPlaces23FS003.Pages
         public JsonResult OnGet(String term)
         {
             IList<string> plantNames = new List<string>();
-            plantNames.Add("Redbud");
-            plantNames.Add("Red Maple");
-            plantNames.Add("Red Oak");
-            plantNames.Add("Red Rose");
-            plantNames.Add("Red Lily");
+            foreach(var specimen in SpecimenRepository.allSpecimens)
+            {
+                plantNames.Add(specimen.Common);
+            }
+
 
             IList<string> matchingPlantNames = new List<String>();
 
